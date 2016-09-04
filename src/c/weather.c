@@ -3,6 +3,7 @@
 static Window *s_main_window;
 
 static TextLayer *s_temperature_layer;
+static TextLayer *s_humidity_layer;
 static TextLayer *s_city_layer;
 static BitmapLayer *s_icon_layer;
 static GBitmap *s_icon_bitmap = NULL;
@@ -13,7 +14,8 @@ static uint8_t s_sync_buffer[64];
 enum WeatherKey {
   WEATHER_ICON_KEY = 0x0,         // TUPLE_INT
   WEATHER_TEMPERATURE_KEY = 0x1,  // TUPLE_CSTRING
-  WEATHER_CITY_KEY = 0x2,         // TUPLE_CSTRING
+  WEATHER_HUMIDITY_KEY = 0x2,     // TUPLE_CSTRING
+  WEATHER_CITY_KEY = 0x3,         // TUPLE_CSTRING
 };
 
 static const uint32_t WEATHER_ICONS[] = {
@@ -42,6 +44,11 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
     case WEATHER_TEMPERATURE_KEY:
       // App Sync keeps new_tuple in s_sync_buffer, so we may use it directly
       text_layer_set_text(s_temperature_layer, new_tuple->value->cstring);
+      break;
+
+    case WEATHER_HUMIDITY_KEY:
+      // App Sync keeps new_tuple in s_sync_buffer, so we may use it directly
+      text_layer_set_text(s_humidity_layer, new_tuple->value->cstring);
       break;
 
     case WEATHER_CITY_KEY:
@@ -73,23 +80,32 @@ static void window_load(Window *window) {
   s_icon_layer = bitmap_layer_create(GRect(0, 10, bounds.size.w, 80));
   layer_add_child(window_layer, bitmap_layer_get_layer(s_icon_layer));
 
-  s_temperature_layer = text_layer_create(GRect(0, 90, bounds.size.w, 32));
+  s_temperature_layer = text_layer_create(GRect(0, 85, (bounds.size.w/2) - 5, 32));
   text_layer_set_text_color(s_temperature_layer, GColorWhite);
   text_layer_set_background_color(s_temperature_layer, GColorClear);
   text_layer_set_font(s_temperature_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-  text_layer_set_text_alignment(s_temperature_layer, GTextAlignmentCenter);
+  text_layer_set_text_alignment(s_temperature_layer, GTextAlignmentRight);
   layer_add_child(window_layer, text_layer_get_layer(s_temperature_layer));
 
-  s_city_layer = text_layer_create(GRect(0, 122, bounds.size.w, 32));
+  s_humidity_layer = text_layer_create(GRect((bounds.size.w/2) + 5, 85, (bounds.size.w/2) - 5, 32));
+  text_layer_set_text_color(s_humidity_layer, GColorWhite);
+  text_layer_set_background_color(s_humidity_layer, GColorClear);
+  text_layer_set_font(s_humidity_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_text_alignment(s_humidity_layer, GTextAlignmentLeft);
+  layer_add_child(window_layer, text_layer_get_layer(s_humidity_layer));
+
+  s_city_layer = text_layer_create(GRect(bounds.size.w * 0.2, 132, bounds.size.w * 0.6, 64));
   text_layer_set_text_color(s_city_layer, GColorWhite);
   text_layer_set_background_color(s_city_layer, GColorClear);
-  text_layer_set_font(s_city_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+  text_layer_set_font(s_city_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text_alignment(s_city_layer, GTextAlignmentCenter);
+  text_layer_set_overflow_mode(s_city_layer, GTextOverflowModeWordWrap);
   layer_add_child(window_layer, text_layer_get_layer(s_city_layer));
 
   Tuplet initial_values[] = {
     TupletInteger(WEATHER_ICON_KEY, (uint8_t) 1),
     TupletCString(WEATHER_TEMPERATURE_KEY, "1234\u00B0C"),
+    TupletCString(WEATHER_HUMIDITY_KEY, "1234%"),
     TupletCString(WEATHER_CITY_KEY, "St Pebblesburg"),
   };
 
@@ -107,6 +123,7 @@ static void window_unload(Window *window) {
 
   text_layer_destroy(s_city_layer);
   text_layer_destroy(s_temperature_layer);
+  text_layer_destroy(s_humidity_layer);
   bitmap_layer_destroy(s_icon_layer);
 }
 

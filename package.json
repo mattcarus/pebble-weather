@@ -5,12 +5,13 @@
     "name": "pebblejs-weather",
     "pebble": {
         "capabilities": [
-            ""
+            "location"
         ],
         "displayName": "PebbleJS Weather",
         "enableMultiJS": false,
         "messageKeys": {
-            "WEATHER_CITY_KEY": 2,
+            "WEATHER_CITY_KEY": 3,
+            "WEATHER_HUMIDITY_KEY": 2,
             "WEATHER_ICON_KEY": 0,
             "WEATHER_TEMPERATURE_KEY": 1
         },
@@ -43,7 +44,8 @@
         "targetPlatforms": [
             "aplite",
             "basalt",
-            "chalk"
+            "chalk",
+            "diorite"
         ],
         "uuid": "74460383-8a0f-4bb6-971f-8937c2ed4441",
         "watchapp": {
